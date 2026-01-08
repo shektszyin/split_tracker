@@ -41,7 +41,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary }) => {
         <div className="bg-zinc-900/30 rounded-2xl p-4 flex flex-col items-center border border-zinc-800/50">
             <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">User A</span>
+                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">shek</span>
             </div>
             <span className="text-lg font-semibold text-zinc-200">{fmt(totalA)}</span>
         </div>
@@ -49,7 +49,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary }) => {
         <div className="bg-zinc-900/30 rounded-2xl p-4 flex flex-col items-center border border-zinc-800/50">
             <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
-                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">User B</span>
+                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">yoyo</span>
             </div>
             <span className="text-lg font-semibold text-zinc-200">{fmt(totalB)}</span>
         </div>

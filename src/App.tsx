@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useExpenses } from './hooks/useExpenses';
 import { useCategories } from './hooks/useCategories';
-import { useUserNames } from './hooks/useUserNames';
 import SummaryDashboard from './components/SummaryDashboard';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseList from './components/ExpenseList';
@@ -10,63 +9,38 @@ import BottomNav, { Tab } from './components/BottomNav';
 import HistoryView from './components/HistoryView';
 import SettingsView from './components/SettingsView';
 import ExportView from './components/ExportView';
-import LoginScreen from './components/LoginScreen';
 import { WifiOff, CreditCard, UserCircle } from 'lucide-react';
 
 function App() {
-  const { expenses, isLoading, error, addExpense, deleteExpense, clearExpenses, getSummary, renameUserInExpenses } = useExpenses();
+  // Get household ID from URL (e.g., ?house=shek-yoyo) or use default
+  const houseId = new URLSearchParams(window.location.search).get('house') || 'shek-yoyo-home';
+  
+  // FIXED: No more getSummary function; summary is now an object
+  const { expenses, isLoading, error, addExpense, deleteExpense, summary } = useExpenses(houseId);
   const { categories, addCategory, updateCategory, deleteCategory, getCategoryColor } = useCategories();
-  const { userNames, updateUserName } = useUserNames();
   
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<string | null>(null);
-
-  // Load session user if exists
-  useEffect(() => {
-    const saved = sessionStorage.getItem('fairshare_current_user');
-    if (saved) setCurrentUser(saved);
-  }, []);
-
-  const handleSelectUser = (name: string) => {
-    setCurrentUser(name);
-    sessionStorage.setItem('fairshare_current_user', name);
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    sessionStorage.removeItem('fairshare_current_user');
-  };
-
-  const summary = getSummary(userNames);
+  
+  // Simple toggle for who is currently using the app
+  const [currentUser, setCurrentUser] = useState<'Shek' | 'Yoyo'>('Shek');
 
   const handleAddExpense = (data: any) => {
-    addExpense(data);
+    // Inject the currentUser so the database knows who paid
+    addExpense({ ...data, paidBy: currentUser });
     setIsAddModalOpen(false);
   };
 
-  const handleUpdateUserName = (index: number, newName: string) => {
-    const oldName = userNames[index];
-    updateUserName(index, newName);
-    if (oldName !== newName) {
-        renameUserInExpenses(oldName, newName);
-        if (currentUser === oldName) {
-            handleSelectUser(newName);
-        }
-    }
-  };
-
-  if (!currentUser) {
-    return <LoginScreen userNames={userNames} onSelectUser={handleSelectUser} />;
-  }
-
   const renderContent = () => {
+    if (isLoading) return <div className="p-20 text-center text-zinc-500">Loading...</div>;
+
     switch (activeTab) {
       case 'home':
         return (
           <div className="animate-fade-in space-y-6">
             <section>
-              <SummaryDashboard summary={summary} userNames={userNames} />
+              {/* FIXED: Passing the new summary object */}
+              <SummaryDashboard summary={summary} />
             </section>
             
             {expenses.length > 0 && (
@@ -88,17 +62,15 @@ function App() {
       case 'history':
         return <HistoryView expenses={expenses} getCategoryColor={getCategoryColor} />;
       case 'reports':
-        return <ExportView expenses={expenses} categories={categories} userNames={userNames} />;
+        return <ExportView expenses={expenses} categories={categories} userNames={['Shek', 'Yoyo']} />;
       case 'settings':
         return (
           <SettingsView 
-            onClearData={clearExpenses} 
             categories={categories}
             onAddCategory={addCategory}
             onUpdateCategory={updateCategory}
             onDeleteCategory={deleteCategory}
-            userNames={userNames}
-            onUpdateUserName={handleUpdateUserName}
+            userNames={['Shek', 'Yoyo']}
           />
         );
       default:
@@ -109,12 +81,11 @@ function App() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-white/20">
       
-      {/* Top Header - Hidden on Print */}
       {!isAddModalOpen && (
-          <div className="px-6 py-6 flex items-center justify-between sticky top-0 z-10 bg-black/80 backdrop-blur-md print:hidden">
+          <div className="px-6 py-6 flex items-center justify-between sticky top-0 z-10 bg-black/80 backdrop-blur-md">
              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800">
                 <CreditCard className="w-4 h-4 text-zinc-400" />
-                <span className="text-sm font-semibold text-zinc-200">Shared Tracker</span>
+                <span className="text-sm font-semibold text-zinc-200">House: {houseId}</span>
              </div>
              
              <div className="flex items-center gap-3">
@@ -123,42 +94,38 @@ function App() {
                     <div className="text-sm font-bold text-white leading-none">{currentUser}</div>
                  </div>
                  <button 
-                    onClick={handleLogout} 
-                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-all overflow-hidden relative group"
+                    onClick={() => setCurrentUser(prev => prev === 'Shek' ? 'Yoyo' : 'Shek')} 
+                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-blue-400 hover:text-white transition-all overflow-hidden relative group"
                  >
                     <UserCircle className="w-6 h-6" />
-                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                  </button>
              </div>
           </div>
       )}
 
-      {/* Main Content or Modal */}
-      <main className="flex-1 max-w-md w-full mx-auto px-6 relative print:px-0 print:max-w-none">
+      <main className="flex-1 max-w-md w-full mx-auto px-6 relative">
         {error && (
-            <div className="bg-red-900/20 border border-red-500/20 text-red-400 p-4 rounded-2xl flex items-center gap-3 mb-6 print:hidden">
+            <div className="bg-red-900/20 border border-red-500/20 text-red-400 p-4 rounded-2xl flex items-center gap-3 mb-6">
                 <WifiOff className="w-5 h-5 shrink-0" />
                 <div className="text-sm font-medium">{error}</div>
             </div>
         )}
 
-        {/* Add Modal Overlay */}
         {isAddModalOpen ? (
-            <div className="fixed inset-0 z-50 bg-black animate-in slide-in-from-bottom-10 duration-300">
+            <div className="fixed inset-0 z-50 bg-black">
                 <div className="h-full max-w-md mx-auto px-6 py-8">
                     <ExpenseForm 
                         onSubmit={handleAddExpense} 
                         onCancel={() => setIsAddModalOpen(false)}
                         categories={categories} 
                         getCategoryColor={getCategoryColor} 
-                        userNames={userNames}
+                        userNames={['Shek', 'Yoyo']}
                     />
                 </div>
             </div>
         ) : (
             renderContent()
         )}
-
       </main>
 
       {!isAddModalOpen && (

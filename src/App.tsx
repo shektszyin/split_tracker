@@ -12,36 +12,36 @@ import ExportView from './components/ExportView';
 import { WifiOff, CreditCard, UserCircle } from 'lucide-react';
 
 function App() {
-  // Get household ID from URL (e.g., ?house=shek-yoyo) or use default
   const houseId = new URLSearchParams(window.location.search).get('house') || 'shek-yoyo-home';
   
-  // FIXED: No more getSummary function; summary is now an object
   const { expenses, isLoading, error, addExpense, deleteExpense, summary } = useExpenses(houseId);
   const { categories, addCategory, updateCategory, deleteCategory, getCategoryColor } = useCategories();
   
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  
-  // Simple toggle for who is currently using the app
   const [currentUser, setCurrentUser] = useState<'Shek' | 'Yoyo'>('Shek');
 
   const handleAddExpense = (data: any) => {
-    // Inject the currentUser so the database knows who paid
-    addExpense({ ...data, paid_By: currentUser });
+    // Matches your DB column name 'paid_by'
+    addExpense({ ...data, paidBy: currentUser }); 
     setIsAddModalOpen(false);
   };
 
   const renderContent = () => {
+    // FIX: This guard stops the black screen by waiting for the data to arrive
     if (isLoading || !summary) {
-    return <div className="p-20 text-center text-zinc-500">Syncing...</div>;
-  }
+      return (
+        <div className="flex flex-col items-center justify-center py-40 text-zinc-500">
+          <div className="animate-pulse font-medium">Connecting to Database...</div>
+        </div>
+      );
+    }
 
     switch (activeTab) {
       case 'home':
         return (
           <div className="animate-fade-in space-y-6">
             <section>
-              {/* FIXED: Passing the new summary object */}
               <SummaryDashboard summary={summary} />
             </section>
             
@@ -62,13 +62,13 @@ function App() {
           </div>
         );
       case 'history':
-  return (
-    <HistoryView 
-      expenses={expenses} 
-      getCategoryColor={getCategoryColor} 
-      onDelete={deleteExpense} // This allows you to delete directly from history!
-    />
-  );
+        return (
+          <HistoryView 
+            expenses={expenses} 
+            getCategoryColor={getCategoryColor} 
+            onDelete={deleteExpense} 
+          />
+        );
       case 'reports':
         return <ExportView expenses={expenses} categories={categories} userNames={['Shek', 'Yoyo']} />;
       case 'settings':
@@ -88,7 +88,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-white/20">
-      
       {!isAddModalOpen && (
           <div className="px-6 py-6 flex items-center justify-between sticky top-0 z-10 bg-black/80 backdrop-blur-md">
              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800">
@@ -98,12 +97,12 @@ function App() {
              
              <div className="flex items-center gap-3">
                  <div className="text-right">
-                    <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Active</div>
+                    <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Active</div>
                     <div className="text-sm font-bold text-white leading-none">{currentUser}</div>
                  </div>
                  <button 
                     onClick={() => setCurrentUser(prev => prev === 'Shek' ? 'Yoyo' : 'Shek')} 
-                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-blue-400 hover:text-white transition-all overflow-hidden relative group"
+                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-blue-400 hover:text-white transition-all overflow-hidden"
                  >
                     <UserCircle className="w-6 h-6" />
                  </button>

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 export type User = string;
+=======
+export type User = 'User A' | 'User B';
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 
 export type Category = string;
 
@@ -26,4 +30,8 @@ export interface SummaryStats {
     creditor: User;
     amount: number;
   };
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1

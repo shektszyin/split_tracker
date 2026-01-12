@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { Trash2, Database, Info, ChevronRight, Plus, X, Check, Edit2, UserCircle } from 'lucide-react';
+=======
+import { Trash2, Database, Info, ChevronRight, Plus, X, Check, Edit2 } from 'lucide-react';
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 import { USE_BACKEND } from '../constants';
 import { CategoryItem } from '../types';
 import { COLOR_PALETTE } from '../constants';
@@ -10,8 +14,11 @@ interface SettingsViewProps {
   onAddCategory: (name: string, color: string) => void;
   onUpdateCategory: (id: string, name: string, color: string) => void;
   onDeleteCategory: (id: string) => void;
+<<<<<<< HEAD
   userNames: string[];
   onUpdateUserName: (index: number, name: string) => void;
+=======
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({ 
@@ -19,9 +26,13 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   categories, 
   onAddCategory, 
   onUpdateCategory, 
+<<<<<<< HEAD
   onDeleteCategory,
   userNames,
   onUpdateUserName
+=======
+  onDeleteCategory 
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 }) => {
   const [isEditingCats, setIsEditingCats] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -32,10 +43,13 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
 
+<<<<<<< HEAD
   // User name editing state
   const [editingUserIndex, setEditingUserIndex] = useState<number | null>(null);
   const [tempUserName, setTempUserName] = useState('');
 
+=======
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
   const handleStartEdit = (cat: CategoryItem) => {
     setEditId(cat.id);
     setEditName(cat.name);
@@ -49,6 +63,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     }
   };
 
+<<<<<<< HEAD
   const handleStartUserEdit = (index: number, currentName: string) => {
     setEditingUserIndex(index);
     setTempUserName(currentName);
@@ -61,6 +76,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       setEditingUserIndex(null);
   }
 
+=======
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
   const handleAdd = () => {
     if (newCatName) {
       onAddCategory(newCatName, newCatColor);
@@ -81,6 +98,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     <div className="space-y-8 animate-fade-in pt-4 pb-20">
       <h2 className="text-xl font-bold text-white px-2 tracking-tight">Settings</h2>
 
+<<<<<<< HEAD
        {/* User Profiles */}
       <div className="space-y-3">
          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Users</h3>
@@ -121,6 +139,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
          </div>
       </div>
 
+=======
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
       {/* Category Management */}
       <div className="space-y-3">
          <div className="flex items-center justify-between px-2">
@@ -272,4 +292,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   );
 };
 
+<<<<<<< HEAD
 export default SettingsView;
+=======
+export default SettingsView;
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1

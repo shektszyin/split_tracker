@@ -11,11 +11,19 @@
   "dependencies": {
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
+<<<<<<< HEAD
     "react-dom": "^19.2.3",
     "recharts": "^3.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.19.5",
+=======
+    "recharts": "^3.6.0",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+>>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

@@ -60,7 +60,13 @@ function App() {
           </div>
         );
       case 'history':
-        return <HistoryView expenses={expenses} getCategoryColor={getCategoryColor} />;
+  return (
+    <HistoryView 
+      expenses={expenses} 
+      getCategoryColor={getCategoryColor} 
+      onDelete={deleteExpense} // This allows you to delete directly from history!
+    />
+  );
       case 'reports':
         return <ExportView expenses={expenses} categories={categories} userNames={['Shek', 'Yoyo']} />;
       case 'settings':

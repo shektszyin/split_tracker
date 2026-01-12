@@ -1,10 +1,6 @@
 import { CategoryItem, User } from './types';
 
-<<<<<<< HEAD
 export const USERS: User[] = ['shek', 'yoyo'];
-=======
-export const USERS: User[] = ['User A', 'User B'];
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 
 export const DEFAULT_CATEGORIES: CategoryItem[] = [
   { id: '1', name: 'Groceries', color: '#34d399' },

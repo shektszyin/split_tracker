@@ -1,8 +1,4 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-=======
-import { USERS } from '../constants';
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 import { User, CategoryItem } from '../types';
 import { Check, X, ChevronDown } from 'lucide-react';
 
@@ -11,7 +7,6 @@ interface ExpenseFormProps {
   onCancel: () => void;
   categories: CategoryItem[];
   getCategoryColor: (name: string) => string;
-<<<<<<< HEAD
   userNames: string[];
 }
 
@@ -20,15 +15,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<string>('');
   const [paidBy, setPaidBy] = useState<User>(userNames[0]);
-=======
-}
-
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categories, getCategoryColor }) => {
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<string>('');
-  const [paidBy, setPaidBy] = useState<User>('User A');
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 
   useEffect(() => {
     if (categories.length > 0 && !category) {
@@ -36,7 +22,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
     }
   }, [categories, category]);
 
-<<<<<<< HEAD
   // Ensure paidBy is valid if userNames change (though unusual in this context)
   useEffect(() => {
     if (!userNames.includes(paidBy)) {
@@ -44,8 +29,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
     }
   }, [userNames, paidBy]);
 
-=======
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !amount || !category) return;
@@ -100,17 +83,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
             />
         </div>
 
-<<<<<<< HEAD
         {/* Category Dropdown */}
         <div>
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Category</label>
             <div className="relative">
-=======
-        {/* Category */}
-        <div>
-            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Category</label>
-             <div className="relative">
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
                 <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
                      <div 
                         className="w-3 h-3 rounded-full ring-2 ring-zinc-900" 
@@ -138,11 +114,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
         <div>
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Paid By</label>
             <div className="grid grid-cols-2 gap-4">
-<<<<<<< HEAD
                 {userNames.map((user) => (
-=======
-                {USERS.map((user) => (
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
                     <button
                         key={user}
                         type="button"

@@ -4,16 +4,10 @@ import { Calendar, ArrowDownLeft, ArrowUpRight, Scale } from 'lucide-react';
 
 interface SummaryDashboardProps {
   summary: SummaryStats;
-<<<<<<< HEAD
   userNames: string[];
 }
 
 const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, userNames }) => {
-=======
-}
-
-const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary }) => {
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
   const { total, totalA, totalB, settlement } = summary;
 
   const fmt = (num: number) =>
@@ -48,11 +42,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary }) => {
         <div className="bg-zinc-900/30 rounded-2xl p-4 flex flex-col items-center border border-zinc-800/50">
             <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-<<<<<<< HEAD
                 <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">{userNames[0]}</span>
-=======
-                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">shek</span>
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
             </div>
             <span className="text-lg font-semibold text-zinc-200">{fmt(totalA)}</span>
         </div>
@@ -60,11 +50,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary }) => {
         <div className="bg-zinc-900/30 rounded-2xl p-4 flex flex-col items-center border border-zinc-800/50">
             <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
-<<<<<<< HEAD
                 <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">{userNames[1]}</span>
-=======
-                <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">yoyo</span>
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
             </div>
             <span className="text-lg font-semibold text-zinc-200">{fmt(totalB)}</span>
         </div>

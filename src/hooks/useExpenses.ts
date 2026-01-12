@@ -45,10 +45,17 @@ export const useExpenses = (householdId: string) => {
     if (error) setError(error.message);
   }, [householdId]);
 
-  const deleteExpense = useCallback(async (id: string) => {
-    const { error } = await supabase.from('expenses').delete().eq('id', id);
-    if (error) setError(error.message);
-  }, []);
+ const deleteExpense = useCallback(async (id: string) => {
+  const { error } = await supabase
+    .from('expenses')
+    .delete()
+    .eq('id', id); // Matches the unique ID of the expense
+
+  if (error) {
+    console.error("Delete failed:", error.message);
+    setError(error.message); // This will show the error on your screen
+  }
+}, []);
 
   const summary = useMemo(() => {
     // Default state to prevent crashes on first load

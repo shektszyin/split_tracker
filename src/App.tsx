@@ -1,13 +1,7 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { useExpenses } from './hooks/useExpenses';
 import { useCategories } from './hooks/useCategories';
 import { useUserNames } from './hooks/useUserNames';
-=======
-import React, { useState } from 'react';
-import { useExpenses } from './hooks/useExpenses';
-import { useCategories } from './hooks/useCategories';
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 import SummaryDashboard from './components/SummaryDashboard';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseList from './components/ExpenseList';
@@ -15,7 +9,6 @@ import CategoryChart from './components/CategoryChart';
 import BottomNav, { Tab } from './components/BottomNav';
 import HistoryView from './components/HistoryView';
 import SettingsView from './components/SettingsView';
-<<<<<<< HEAD
 import ExportView from './components/ExportView';
 import LoginScreen from './components/LoginScreen';
 import { WifiOff, CreditCard, UserCircle } from 'lucide-react';
@@ -46,22 +39,12 @@ function App() {
   };
 
   const summary = getSummary(userNames);
-=======
-import { WifiOff, CreditCard } from 'lucide-react';
-
-function App() {
-  const { expenses, isLoading, error, addExpense, deleteExpense, clearExpenses, summary } = useExpenses();
-  const { categories, addCategory, updateCategory, deleteCategory, getCategoryColor } = useCategories();
-  const [activeTab, setActiveTab] = useState<Tab>('home');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
 
   const handleAddExpense = (data: any) => {
     addExpense(data);
     setIsAddModalOpen(false);
   };
 
-<<<<<<< HEAD
   const handleUpdateUserName = (index: number, newName: string) => {
     const oldName = userNames[index];
     updateUserName(index, newName);
@@ -77,19 +60,13 @@ function App() {
     return <LoginScreen userNames={userNames} onSelectUser={handleSelectUser} />;
   }
 
-=======
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return (
           <div className="animate-fade-in space-y-6">
             <section>
-<<<<<<< HEAD
               <SummaryDashboard summary={summary} userNames={userNames} />
-=======
-              <SummaryDashboard summary={summary} />
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
             </section>
             
             {expenses.length > 0 && (
@@ -110,11 +87,8 @@ function App() {
         );
       case 'history':
         return <HistoryView expenses={expenses} getCategoryColor={getCategoryColor} />;
-<<<<<<< HEAD
       case 'reports':
         return <ExportView expenses={expenses} categories={categories} userNames={userNames} />;
-=======
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
       case 'settings':
         return (
           <SettingsView 
@@ -123,11 +97,8 @@ function App() {
             onAddCategory={addCategory}
             onUpdateCategory={updateCategory}
             onDeleteCategory={deleteCategory}
-<<<<<<< HEAD
             userNames={userNames}
             onUpdateUserName={handleUpdateUserName}
-=======
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
           />
         );
       default:
@@ -138,7 +109,6 @@ function App() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-white/20">
       
-<<<<<<< HEAD
       {/* Top Header - Hidden on Print */}
       {!isAddModalOpen && (
           <div className="px-6 py-6 flex items-center justify-between sticky top-0 z-10 bg-black/80 backdrop-blur-md print:hidden">
@@ -160,31 +130,13 @@ function App() {
                     <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                  </button>
              </div>
-=======
-      {/* Top Header */}
-      {!isAddModalOpen && (
-          <div className="px-6 py-6 flex items-center justify-between sticky top-0 z-10 bg-black/80 backdrop-blur-md">
-             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800">
-                <CreditCard className="w-4 h-4 text-zinc-400" />
-                <span className="text-sm font-semibold text-zinc-200">All Accounts</span>
-             </div>
-             <button onClick={() => setActiveTab('settings')} className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
-                 <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-zinc-500 to-zinc-700"></div>
-             </button>
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
           </div>
       )}
 
       {/* Main Content or Modal */}
-<<<<<<< HEAD
       <main className="flex-1 max-w-md w-full mx-auto px-6 relative print:px-0 print:max-w-none">
         {error && (
             <div className="bg-red-900/20 border border-red-500/20 text-red-400 p-4 rounded-2xl flex items-center gap-3 mb-6 print:hidden">
-=======
-      <main className="flex-1 max-w-md w-full mx-auto px-6 relative">
-        {error && (
-            <div className="bg-red-900/20 border border-red-500/20 text-red-400 p-4 rounded-2xl flex items-center gap-3 mb-6">
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
                 <WifiOff className="w-5 h-5 shrink-0" />
                 <div className="text-sm font-medium">{error}</div>
             </div>
@@ -199,10 +151,7 @@ function App() {
                         onCancel={() => setIsAddModalOpen(false)}
                         categories={categories} 
                         getCategoryColor={getCategoryColor} 
-<<<<<<< HEAD
                         userNames={userNames}
-=======
->>>>>>> 01637ea2cbe9071fac0054fa25c7b2a89e505ea1
                     />
                 </div>
             </div>

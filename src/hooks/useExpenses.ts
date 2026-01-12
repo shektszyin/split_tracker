@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { supabase } from '../supabaseClient'; 
+import { supabase } from '../supabaseClient';
 
 // types updated for Shek/Yoyo naming
 export const useExpenses = (householdId: string) => {

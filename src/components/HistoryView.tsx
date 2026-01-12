@@ -7,14 +7,21 @@ interface HistoryViewProps {
   onDelete?: (id: string) => void;
 }
 
-const HistoryView: React.FC<HistoryViewProps> = ({ expenses, getCategoryColor, onDelete }) => {
+const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryColor, onDelete }) => {
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
+
+  // SAFE GUARD: If getCategoryColor is missing, use a fallback function
+  const safeGetColor = typeof getCategoryColor === 'function' 
+    ? getCategoryColor 
+    : () => '#3f3f46';
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, { expenses: any[]; total: number }> = {};
     
+    // Ensure expenses is an array before looping
+    if (!Array.isArray(expenses)) return [];
+
     expenses.forEach(expense => {
-      // Use created_at (Supabase) and add fallback to prevent substring crash
       const rawDate = expense.created_at || new Date().toISOString();
       const key = viewMode === 'month' 
         ? rawDate.substring(0, 7) 
@@ -85,11 +92,12 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, getCategoryColor, o
             {data.expenses.map(expense => (
               <div key={expense.id} className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
                 <div className="flex items-center gap-4">
-                   <div className="w-1.5 h-8 rounded-full opacity-60" style={{ backgroundColor: getCategoryColor(expense.category || 'Other') }} />
+                   {/* SAFE CALL to the color function */}
+                   <div className="w-1.5 h-8 rounded-full opacity-60" style={{ backgroundColor: safeGetColor(expense.category || 'Other') }} />
                    <div>
                        <div className="text-slate-200 text-sm font-medium">{expense.name || 'Untitled'}</div>
                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-zinc-500 uppercase font-bold">{expense.paid_by}</span>
+                          <span className="text-[10px] text-zinc-500 uppercase font-bold">{expense.paid_by || 'Unknown'}</span>
                           <span className="text-[10px] text-slate-600">•</span>
                           <span className="text-[10px] text-slate-500 uppercase tracking-wider">
                             {new Date(expense.created_at || Date.now()).toLocaleDateString(undefined, {day: 'numeric', month: 'short'})}
@@ -99,10 +107,17 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, getCategoryColor, o
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-slate-200 font-bold text-sm">
-                    {fmtMoney(expense.amount)}
+                    {fmtMoney(Number(expense.amount || 0))}
                   </div>
-                  {onDelete && (
-                    <button onClick={() => onDelete(expense.id)} className="p-1 text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* SAFE CALL: Check if onDelete is a function before calling */}
+                  {typeof onDelete === 'function' && (
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onDelete(expense.id);
+                      }} 
+                      className="p-1 text-slate-600 hover:text-red-400 opacity-100 transition-opacity"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}

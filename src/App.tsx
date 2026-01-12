@@ -27,12 +27,14 @@ function App() {
 
   const handleAddExpense = (data: any) => {
     // Inject the currentUser so the database knows who paid
-    addExpense({ ...data, paidBy: currentUser });
+    addExpense({ ...data, paid_By: currentUser });
     setIsAddModalOpen(false);
   };
 
   const renderContent = () => {
-    if (isLoading) return <div className="p-20 text-center text-zinc-500">Loading...</div>;
+    if (isLoading || !summary) {
+    return <div className="p-20 text-center text-zinc-500">Syncing...</div>;
+  }
 
     switch (activeTab) {
       case 'home':

@@ -2,26 +2,31 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 
 export const useExpenses = (householdId: string) => {
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [expenses, setExpenses, fetchExpenses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-  const fetchExpenses = async () => {
-    setIsLoading(true);
-    // This part communicates with the database on refresh
-    const { data, error } = await supabase
-      .from('expenses')
-      .select('*')
-      .eq('household_id', householdId) 
-      .order('created_at', { ascending: false });
-
-    if (!error) setExpenses(data || []); // This updates the screen with saved data
-    setIsLoading(false);
-  };
-
   fetchExpenses();
-}, [householdId]); // This ensures it runs every time the house ID is detected
+
+  const channel = supabase
+    .channel(`room-${householdId}`)
+    .on('postgres_changes', 
+      { 
+        event: '*', // This catches INSERT, UPDATE, and DELETE
+        schema: 'public', 
+        table: 'expenses', 
+        filter: `household_id=eq.${householdId}` 
+      }, 
+      () => {
+        console.log("Change detected! Refreshing data...");
+        fetchExpenses(); 
+      }
+    )
+    .subscribe();
+
+  return () => { supabase.removeChannel(channel); };
+}, [householdId, fetchExpenses]);
 
   const addExpense = useCallback(async (data: any) => {
     const { error } = await supabase.from('expenses').insert([{
@@ -35,17 +40,22 @@ export const useExpenses = (householdId: string) => {
     if (error) setError(error.message);
   }, [householdId]);
 
- const deleteExpense = useCallback(async (id: string) => {
+const deleteExpense = useCallback(async (id: string) => {
+  // 1. Optimistic Update: Remove it from the screen immediately
+  setExpenses((prev) => prev.filter((expense) => expense.id !== id));
+
+  // 2. Perform the actual delete in the background
   const { error } = await supabase
     .from('expenses')
     .delete()
-    .eq('id', id); // Matches the unique ID of the expense
+    .eq('id', id);
 
   if (error) {
     console.error("Delete failed:", error.message);
-    setError(error.message); // This will show the error on your screen
+    // 3. Optional: If the database delete fails, refresh to bring the data back
+    fetchExpenses();
   }
-}, []);
+}, [fetchExpenses]);
 
   const summary = useMemo(() => {
     // Default state to prevent crashes on first load

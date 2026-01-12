@@ -1,9 +1,8 @@
 import React from 'react';
-import { Expense } from '../types';
 import { Trash2, Loader2, Compass } from 'lucide-react';
 
 interface ExpenseListProps {
-  expenses: Expense[];
+  expenses: any[]; // Changed to any[] to handle Supabase dynamic fields
   isLoading?: boolean;
   onDelete: (id: string) => void;
   getCategoryColor: (name: string) => string;
@@ -18,11 +17,11 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, isLoading = false, 
     );
   }
 
-  if (expenses.length === 0) {
+  if (!expenses || expenses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 opacity-50">
         <Compass className="w-12 h-12 text-zinc-600 mb-4" strokeWidth={1} />
-        <p className="text-zinc-500 text-sm font-medium">No transactions for this period</p>
+        <p className="text-zinc-500 text-sm font-medium">No transactions found</p>
       </div>
     );
   }
@@ -42,18 +41,20 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, isLoading = false, 
             <div className="flex items-center gap-4">
               <div 
                 className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-black"
-                style={{ backgroundColor: getCategoryColor(expense.category) }}
+                style={{ backgroundColor: getCategoryColor(expense.category || 'Other') }}
               >
-                {expense.category.charAt(0)}
+                {(expense.category || 'O').charAt(0)}
               </div>
               
               <div className="flex flex-col">
-                <span className="text-zinc-100 font-medium text-base">{expense.name}</span>
+                <span className="text-zinc-100 font-medium text-base">{expense.name || 'Untitled'}</span>
                 <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    <span>{new Date(expense.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
+                    {/* FIXED: Using Supabase 'created_at' instead of 'date' */}
+                    <span>{new Date(expense.created_at || Date.now()).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
                     <span>•</span>
-                    <span className={expense.paidBy === 'User A' ? 'text-emerald-500' : 'text-orange-500'}>
-                        {expense.paidBy}
+                    {/* FIXED: Using 'paid_by' and specific Shek/Yoyo colors */}
+                    <span className={expense.paid_by === 'Shek' ? 'text-emerald-500' : 'text-orange-500'}>
+                        {expense.paid_by || 'Unknown'}
                     </span>
                 </div>
               </div>
@@ -61,14 +62,16 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, isLoading = false, 
 
             <div className="flex items-center gap-4">
                 <span className="text-white font-semibold text-base tracking-tight">
-                  ${expense.amount.toFixed(2)}
+                  ${Number(expense.amount || 0).toFixed(2)}
                 </span>
                 <button
                   onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
-                      onDelete(expense.id);
+                      // Force string conversion to ensure eq('id', id) works
+                      onDelete(String(expense.id));
                   }}
-                  className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

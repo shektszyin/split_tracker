@@ -3,7 +3,8 @@ import { User, CategoryItem } from '../types';
 import { Check, X, ChevronDown } from 'lucide-react';
 
 interface ExpenseFormProps {
-  onSubmit: (data: { name: string; amount: number; category: string; paidBy: User }) => void;
+  // FIXED: Changed paidBy to paid_by to match your database
+  onSubmit: (data: { name: string; amount: number; category: string; paid_by: string }) => void;
   onCancel: () => void;
   categories: CategoryItem[];
   getCategoryColor: (name: string) => string;
@@ -14,7 +15,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<string>('');
-  const [paidBy, setPaidBy] = useState<User>(userNames[0]);
+  const [paidBy, setPaidBy] = useState<string>(userNames[0]);
 
   useEffect(() => {
     if (categories.length > 0 && !category) {
@@ -22,22 +23,16 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
     }
   }, [categories, category]);
 
-  // Ensure paidBy is valid if userNames change (though unusual in this context)
-  useEffect(() => {
-    if (!userNames.includes(paidBy)) {
-        setPaidBy(userNames[0]);
-    }
-  }, [userNames, paidBy]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !amount || !category) return;
 
+    // FIXED: Now correctly sends 'paid_by' to match the interface above
     onSubmit({
       name,
       amount: parseFloat(amount),
       category,
-      paidBy,
+      paid_by: paidBy, 
     });
   };
 
@@ -51,8 +46,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
       </div>
 
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-6">
-        
-        {/* Amount Input */}
         <div className="relative">
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Amount</label>
             <div className="flex items-center">
@@ -70,7 +63,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
             </div>
         </div>
 
-        {/* Name Input */}
         <div>
              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Description</label>
             <input
@@ -78,12 +70,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="What is this for?"
-              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 text-lg text-white placeholder-zinc-600 focus:border-white/20 focus:bg-zinc-900 transition-colors focus:ring-0"
+              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 text-lg text-white placeholder-zinc-600 focus:ring-0"
               required
             />
         </div>
 
-        {/* Category Dropdown */}
         <div>
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Category</label>
             <div className="relative">
@@ -96,7 +87,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
                 <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl pl-12 pr-12 py-4 text-lg text-white appearance-none focus:border-white/20 focus:bg-zinc-900 transition-colors focus:ring-0"
+                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl pl-12 pr-12 py-4 text-lg text-white appearance-none focus:ring-0"
                 >
                     {categories.map((cat) => (
                         <option key={cat.id} value={cat.name} className="bg-zinc-900 text-white">
@@ -110,7 +101,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
             </div>
         </div>
 
-        {/* Paid By */}
         <div>
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Paid By</label>
             <div className="grid grid-cols-2 gap-4">
@@ -131,7 +121,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
             </div>
         </div>
 
-        {/* Submit */}
         <div className="mt-auto pt-4">
             <button
                 type="submit"

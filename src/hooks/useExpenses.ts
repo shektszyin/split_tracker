@@ -39,7 +39,7 @@ export const useExpenses = (householdId: string) => {
       name: data.name,
       amount: Number(data.amount),
       category: data.category,
-      paid_by: data.paidBy, 
+      paid_by: data.paid_by, 
       household_id: householdId,
       month: new Date().toISOString().slice(0, 7)
     }]);

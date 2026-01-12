@@ -23,7 +23,7 @@ function App() {
 
   const handleAddExpense = (data: any) => {
     // Matches your DB column name 'paid_by'
-    addExpense({ ...data, paidBy: currentUser }); 
+    addExpense(data); 
     setIsAddModalOpen(false);
   };
 

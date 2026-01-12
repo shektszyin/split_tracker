@@ -7,31 +7,21 @@ export const useExpenses = (householdId: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchExpenses = async () => {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('household_id', householdId)
-        .order('created_at', { ascending: false });
+  const fetchExpenses = async () => {
+    setIsLoading(true);
+    // This part communicates with the database on refresh
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('household_id', householdId) 
+      .order('created_at', { ascending: false });
 
-      if (error) setError(error.message);
-      else setExpenses(data || []);
-      setIsLoading(false);
-    };
+    if (!error) setExpenses(data || []); // This updates the screen with saved data
+    setIsLoading(false);
+  };
 
-    fetchExpenses();
-
-    const channel = supabase
-      .channel(`room-${householdId}`)
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'expenses', filter: `household_id=eq.${householdId}` }, 
-        () => fetchExpenses()
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [householdId]);
+  fetchExpenses();
+}, [householdId]); // This ensures it runs every time the house ID is detected
 
   const addExpense = useCallback(async (data: any) => {
     const { error } = await supabase.from('expenses').insert([{

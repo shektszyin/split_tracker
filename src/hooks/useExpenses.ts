@@ -34,6 +34,29 @@ export const useExpenses = (householdId: string) => {
     return () => { supabase.removeChannel(channel); };
   }, [householdId, fetchExpenses]);
 
+  // src/hooks/useExpenses.ts
+
+// ... inside the useExpenses hook
+const updateExpense = useCallback(async (id: string, updatedData: any) => {
+  const { error: err } = await supabase
+    .from('expenses')
+    .update({
+      name: updatedData.name,
+      amount: Number(updatedData.amount),
+      category: updatedData.category,
+      paid_by: updatedData.paid_by
+    })
+    .eq('id', id);
+
+  if (err) {
+    console.error("Update Error:", err.message);
+    fetchExpenses(); // Re-sync if it failed
+  }
+}, [fetchExpenses]);
+
+// Add updateExpense to the return object
+return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, summary };
+
   const addExpense = useCallback(async (data: any) => {
     const { error: err } = await supabase.from('expenses').insert([{
       name: data.name,

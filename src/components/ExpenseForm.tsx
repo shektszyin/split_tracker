@@ -47,7 +47,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       amount: parseFloat(amount),
       category,
       paid_by: paidBy,
-      created_at: initialData?.created_at || new Date().toISOString(), // Keep existing date or set new
+      // FIXED: Now correctly uses the 'date' state from your input field
+      created_at: new Date(date).toISOString(), 
     });
   };
 

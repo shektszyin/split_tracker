@@ -37,16 +37,17 @@ export const useExpenses = (householdId: string) => {
       .update({
         name: updatedData.name,
         amount: Number(updatedData.amount),
-        category: updatedData.category, // This updates the record type
+        category: updatedData.category,
         paid_by: updatedData.paid_by,
-        created_at: updatedData.created_at
+        created_at: updatedData.created_at,
+        month: new Date(updatedData.created_at).toISOString().slice(0, 7)
       })
       .eq('id', id);
 
     if (err) {
       console.error("Update Error:", err.message);
     } else {
-      fetchExpenses(); // Force refresh to show changes immediately
+      fetchExpenses(); 
     }
   }, [fetchExpenses]);
 
@@ -64,13 +65,19 @@ export const useExpenses = (householdId: string) => {
     await supabase.from('expenses').delete().eq('id', id);
   }, []);
 
+  // FIXED: Summary now filters for the current month to "reset" the dashboard
   const summary = useMemo(() => {
-    if (!Array.isArray(expenses) || expenses.length === 0) {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonthExpenses = expenses.filter(e => e.month === currentMonth);
+
+    if (currentMonthExpenses.length === 0) {
       return { total: 0, totalA: 0, totalB: 0, settlement: { debtor: 'Shek', creditor: 'Yoyo', amount: 0 } };
     }
-    const total = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    const totalA = expenses.filter(e => e.paid_by === 'Shek').reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    const totalB = expenses.filter(e => e.paid_by === 'Yoyo').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    const total = currentMonthExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    const totalA = currentMonthExpenses.filter(e => e.paid_by === 'Shek').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    const totalB = currentMonthExpenses.filter(e => e.paid_by === 'Yoyo').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    
     return {
       total, totalA, totalB,
       settlement: {
@@ -81,6 +88,5 @@ export const useExpenses = (householdId: string) => {
     };
   }, [expenses]);
 
-  // THIS MUST BE THE ONLY RETURN AND AT THE VERY END
   return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, summary };
 };

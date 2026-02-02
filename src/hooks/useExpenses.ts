@@ -41,6 +41,7 @@ export const useExpenses = (householdId: string) => {
       category: data.category,
       paid_by: data.paid_by, 
       household_id: householdId,
+      created_at: data.created_at,
       month: new Date().toISOString().slice(0, 7)
     }]);
     if (err) console.error("Add Error:", err.message);
@@ -54,13 +55,15 @@ export const useExpenses = (householdId: string) => {
         name: updatedData.name,
         amount: Number(updatedData.amount),
         category: updatedData.category,
-        paid_by: updatedData.paid_by
+        paid_by: updatedData.paid_by,
+        created_at: updatedData.created_at
       })
       .eq('id', id);
 
-    if (err) {
+   if (err) {
       console.error("Update Error:", err.message);
-      fetchExpenses();
+    } else {
+      fetchExpenses(); // Re-sync manually to ensure the UI updates
     }
   }, [fetchExpenses]);
 

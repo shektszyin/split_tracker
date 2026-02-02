@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { User, CategoryItem, Expense } from '../types'; // Added Expense type
+import { User, CategoryItem, Expense } from '../types'; 
 import { Check, X, ChevronDown } from 'lucide-react';
 
 interface ExpenseFormProps {
-  // Updated to include an optional initialData prop
-  onSubmit: (data: { name: string; amount: number; category: string; paid_by: string }) => void;
+  // Updated onSubmit to include created_at
+  onSubmit: (data: { name: string; amount: number; category: string; paid_by: string; created_at: string }) => void;
   onCancel: () => void;
   categories: CategoryItem[];
   getCategoryColor: (name: string) => string;
   userNames: string[];
-  initialData?: any; // Add this to receive the record being edited
+  initialData?: any; 
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ 
@@ -18,16 +18,21 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   categories, 
   getCategoryColor, 
   userNames,
-  initialData // Destructure the new prop
+  initialData 
 }) => {
-  // Initialize state with initialData values if they exist, otherwise use defaults
   const [name, setName] = useState(initialData?.name || '');
   const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
   const [category, setCategory] = useState<string>(initialData?.category || '');
   const [paidBy, setPaidBy] = useState<string>(initialData?.paid_by || userNames[0]);
+  
+  // NEW: Add date state. Pre-fill with initialData date or today's date
+  const [date, setDate] = useState(
+    initialData?.created_at 
+      ? new Date(initialData.created_at).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0]
+  );
 
   useEffect(() => {
-    // Ensure a category is selected if none is provided in initialData
     if (categories.length > 0 && !category) {
       setCategory(categories[0].name);
     }
@@ -42,13 +47,14 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       amount: parseFloat(amount),
       category,
       paid_by: paidBy, 
+      // Use the local date state for the submission
+      created_at: new Date(date).toISOString(),
     });
   };
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
-        {/* Dynamic header based on whether we are editing or creating */}
         <h2 className="text-2xl font-bold text-white">
           {initialData ? 'Edit Expense' : 'New Expense'}
         </h2>
@@ -83,6 +89,18 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
               onChange={(e) => setName(e.target.value)}
               placeholder="What is this for?"
               className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 text-lg text-white placeholder-zinc-600 focus:ring-0"
+              required
+            />
+        </div>
+
+        {/* NEW: Date Input Field */}
+        <div>
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 text-lg text-white focus:ring-0 [color-scheme:dark]"
               required
             />
         </div>

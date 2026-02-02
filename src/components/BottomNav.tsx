@@ -11,6 +11,7 @@ interface BottomNavProps {
 
 const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, onAddClick }) => {
   return (
+    /* FIXED: Added print:hidden to ensure the nav disappears on the receipt */
     <div className="fixed bottom-8 left-0 right-0 z-50 px-4 print:hidden">
       <div className="max-w-md mx-auto">
         <div className="bg-[#121212]/95 backdrop-blur-xl border border-white/5 rounded-[32px] h-20 px-4 flex items-center justify-between shadow-2xl shadow-black ring-1 ring-white/10">

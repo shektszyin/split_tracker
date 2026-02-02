@@ -1,14 +1,21 @@
 import React from 'react';
-import { Trash2, Loader2, Compass } from 'lucide-react';
+import { Trash2, Loader2, Compass, Edit2 } from 'lucide-react'; // Added Edit2 icon
 
 interface ExpenseListProps {
-  expenses: any[]; // Changed to any[] to handle Supabase dynamic fields
+  expenses: any[]; 
   isLoading?: boolean;
   onDelete: (id: string) => void;
+  onEdit: (expense: any) => void; // Added onEdit handler
   getCategoryColor: (name: string) => string;
 }
 
-const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, isLoading = false, onDelete, getCategoryColor }) => {
+const ExpenseList: React.FC<ExpenseListProps> = ({ 
+  expenses, 
+  isLoading = false, 
+  onDelete, 
+  onEdit, // Destructured onEdit
+  getCategoryColor 
+}) => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -49,10 +56,8 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, isLoading = false, 
               <div className="flex flex-col">
                 <span className="text-zinc-100 font-medium text-base">{expense.name || 'Untitled'}</span>
                 <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    {/* FIXED: Using Supabase 'created_at' instead of 'date' */}
                     <span>{new Date(expense.created_at || Date.now()).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
                     <span>•</span>
-                    {/* FIXED: Using 'paid_by' and specific Shek/Yoyo colors */}
                     <span className={expense.paid_by === 'Shek' ? 'text-emerald-500' : 'text-orange-500'}>
                         {expense.paid_by || 'Unknown'}
                     </span>
@@ -60,15 +65,27 @@ const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, isLoading = false, 
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                <span className="text-white font-semibold text-base tracking-tight">
+            <div className="flex items-center gap-2"> {/* Changed gap and added edit button */}
+                <span className="text-white font-semibold text-base tracking-tight mr-2">
                   ${Number(expense.amount || 0).toFixed(2)}
                 </span>
+                
+                {/* New Edit Button */}
                 <button
                   onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      // Force string conversion to ensure eq('id', id) works
+                      onEdit(expense);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-600 hover:text-blue-400 hover:bg-blue-500/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       onDelete(String(expense.id));
                   }}
                   className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"

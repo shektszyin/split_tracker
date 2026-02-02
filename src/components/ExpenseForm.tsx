@@ -46,9 +46,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       name,
       amount: parseFloat(amount),
       category,
-      paid_by: paidBy, 
-      // Use the local date state for the submission
-      created_at: new Date(date).toISOString(),
+      paid_by: paidBy,
+      created_at: initialData?.created_at || new Date().toISOString(), // Keep existing date or set new
     });
   };
 

@@ -26,60 +26,43 @@ export const useExpenses = (householdId: string) => {
         schema: 'public', 
         table: 'expenses', 
         filter: `household_id=eq.${householdId}` 
-      }, () => {
-        fetchExpenses();
-      })
+      }, () => fetchExpenses())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [householdId, fetchExpenses]);
 
-  // Logic for adding a new expense
-  const addExpense = useCallback(async (data: any) => {
-    const { error: err } = await supabase.from('expenses').insert([{
-      name: data.name,
-      amount: Number(data.amount),
-      category: data.category,
-      paid_by: data.paid_by, 
-      household_id: householdId,
-      created_at: data.created_at,
-      month: new Date().toISOString().slice(0, 7)
-    }]);
-    if (err) console.error("Add Error:", err.message);
-  }, [householdId]);
-
-  // Logic for updating an existing expense
   const updateExpense = useCallback(async (id: string, updatedData: any) => {
     const { error: err } = await supabase
       .from('expenses')
       .update({
         name: updatedData.name,
         amount: Number(updatedData.amount),
-        category: updatedData.category,
+        category: updatedData.category, // This updates the record type
         paid_by: updatedData.paid_by,
         created_at: updatedData.created_at
       })
       .eq('id', id);
 
-   if (err) {
+    if (err) {
       console.error("Update Error:", err.message);
     } else {
-      fetchExpenses(); // Re-sync manually to ensure the UI updates
+      fetchExpenses(); // Force refresh to show changes immediately
     }
   }, [fetchExpenses]);
 
-  // Logic for deleting an expense
+  const addExpense = useCallback(async (data: any) => {
+    const { error: err } = await supabase.from('expenses').insert([{
+      ...data,
+      household_id: householdId,
+      month: new Date(data.created_at || Date.now()).toISOString().slice(0, 7)
+    }]);
+    if (err) console.error("Add Error:", err.message);
+  }, [householdId]);
+
   const deleteExpense = useCallback(async (id: string | number) => {
     setExpenses(prev => prev.filter(e => e.id !== id));
-    const { error: err } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', id);
-
-    if (err) {
-      console.error("Supabase Delete Error:", err.message);
-      fetchExpenses();
-    }
-  }, [fetchExpenses]);
+    await supabase.from('expenses').delete().eq('id', id);
+  }, []);
 
   const summary = useMemo(() => {
     if (!Array.isArray(expenses) || expenses.length === 0) {
@@ -88,17 +71,16 @@ export const useExpenses = (householdId: string) => {
     const total = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     const totalA = expenses.filter(e => e.paid_by === 'Shek').reduce((sum, e) => sum + Number(e.amount || 0), 0);
     const totalB = expenses.filter(e => e.paid_by === 'Yoyo').reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    const diff = totalA - totalB;
     return {
       total, totalA, totalB,
       settlement: {
         debtor: totalA < totalB ? 'Shek' : 'Yoyo',
         creditor: totalA < totalB ? 'Yoyo' : 'Shek',
-        amount: Math.abs(diff) / 2,
+        amount: Math.abs(totalA - totalB) / 2,
       },
     };
   }, [expenses]);
 
-  // SINGLE RETURN STATEMENT AT THE END
+  // THIS MUST BE THE ONLY RETURN AND AT THE VERY END
   return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, summary };
 };

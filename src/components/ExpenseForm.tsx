@@ -1,23 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { User, CategoryItem } from '../types';
+import { User, CategoryItem, Expense } from '../types'; // Added Expense type
 import { Check, X, ChevronDown } from 'lucide-react';
 
 interface ExpenseFormProps {
-  // FIXED: Changed paidBy to paid_by to match your database
+  // Updated to include an optional initialData prop
   onSubmit: (data: { name: string; amount: number; category: string; paid_by: string }) => void;
   onCancel: () => void;
   categories: CategoryItem[];
   getCategoryColor: (name: string) => string;
   userNames: string[];
+  initialData?: any; // Add this to receive the record being edited
 }
 
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categories, getCategoryColor, userNames }) => {
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<string>('');
-  const [paidBy, setPaidBy] = useState<string>(userNames[0]);
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ 
+  onSubmit, 
+  onCancel, 
+  categories, 
+  getCategoryColor, 
+  userNames,
+  initialData // Destructure the new prop
+}) => {
+  // Initialize state with initialData values if they exist, otherwise use defaults
+  const [name, setName] = useState(initialData?.name || '');
+  const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
+  const [category, setCategory] = useState<string>(initialData?.category || '');
+  const [paidBy, setPaidBy] = useState<string>(initialData?.paid_by || userNames[0]);
 
   useEffect(() => {
+    // Ensure a category is selected if none is provided in initialData
     if (categories.length > 0 && !category) {
       setCategory(categories[0].name);
     }
@@ -27,7 +37,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
     e.preventDefault();
     if (!name || !amount || !category) return;
 
-    // FIXED: Now correctly sends 'paid_by' to match the interface above
     onSubmit({
       name,
       amount: parseFloat(amount),
@@ -39,7 +48,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-white">New Expense</h2>
+        {/* Dynamic header based on whether we are editing or creating */}
+        <h2 className="text-2xl font-bold text-white">
+          {initialData ? 'Edit Expense' : 'New Expense'}
+        </h2>
         <button onClick={onCancel} className="p-2 bg-zinc-800 rounded-full text-zinc-400 hover:text-white">
             <X className="w-5 h-5" />
         </button>
@@ -127,7 +139,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel, categorie
                 className="w-full bg-white text-black font-bold text-lg py-5 rounded-[24px] hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 active:scale-95 duration-200"
             >
                 <Check className="w-6 h-6" />
-                Save Transaction
+                {initialData ? 'Update Transaction' : 'Save Transaction'}
             </button>
         </div>
       </form>

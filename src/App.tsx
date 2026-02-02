@@ -14,21 +14,35 @@ import { WifiOff, CreditCard, UserCircle } from 'lucide-react';
 function App() {
   const houseId = new URLSearchParams(window.location.search).get('house') || 'shek-yoyo-home';
   
-  const { expenses, isLoading, error, addExpense, deleteExpense, summary } = useExpenses(houseId);
+  // Destructure updateExpense from your hook
+  const { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, summary } = useExpenses(houseId);
   const { categories, addCategory, updateCategory, deleteCategory, getCategoryColor } = useCategories();
   
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<'Shek' | 'Yoyo'>('Shek');
+  
+  // NEW: State to track which expense is being edited
+  const [editingExpense, setEditingExpense] = useState<any | null>(null);
 
-  const handleAddExpense = (data: any) => {
-    // Matches your DB column name 'paid_by'
-    addExpense(data); 
+  // Updated to handle both Create and Update
+  const handleFormSubmit = (data: any) => {
+    if (editingExpense) {
+      updateExpense(editingExpense.id, data);
+    } else {
+      addExpense(data);
+    }
     setIsAddModalOpen(false);
+    setEditingExpense(null);
+  };
+
+  // Helper to trigger the edit modal
+  const startEditing = (expense: any) => {
+    setEditingExpense(expense);
+    setIsAddModalOpen(true);
   };
 
   const renderContent = () => {
-    // FIX: This guard stops the black screen by waiting for the data to arrive
     if (isLoading || !summary) {
       return (
         <div className="flex flex-col items-center justify-center py-40 text-zinc-500">
@@ -56,6 +70,7 @@ function App() {
                 expenses={expenses.slice(0, 5)} 
                 isLoading={isLoading} 
                 onDelete={deleteExpense}
+                onEdit={startEditing} // NEW: Pass edit handler
                 getCategoryColor={getCategoryColor}
               />
             </section>
@@ -66,7 +81,8 @@ function App() {
           <HistoryView 
             expenses={expenses} 
             getCategoryColor={getCategoryColor} 
-            onDelete={deleteExpense} 
+            onDelete={deleteExpense}
+            onEdit={startEditing} // NEW: Optional add to history view
           />
         );
       case 'reports':
@@ -122,8 +138,12 @@ function App() {
             <div className="fixed inset-0 z-50 bg-black">
                 <div className="h-full max-w-md mx-auto px-6 py-8">
                     <ExpenseForm 
-                        onSubmit={handleAddExpense} 
-                        onCancel={() => setIsAddModalOpen(false)}
+                        onSubmit={handleFormSubmit} 
+                        initialData={editingExpense} // NEW: Pass data to pre-fill form
+                        onCancel={() => {
+                          setIsAddModalOpen(false);
+                          setEditingExpense(null); // Reset on close
+                        }}
                         categories={categories} 
                         getCategoryColor={getCategoryColor} 
                         userNames={['Shek', 'Yoyo']}
@@ -139,7 +159,10 @@ function App() {
         <BottomNav 
             activeTab={activeTab} 
             onTabChange={setActiveTab} 
-            onAddClick={() => setIsAddModalOpen(true)}
+            onAddClick={() => {
+              setEditingExpense(null); // Ensure form is empty for new entries
+              setIsAddModalOpen(true);
+            }}
         />
       )}
     </div>

@@ -27,36 +27,13 @@ export const useExpenses = (householdId: string) => {
         table: 'expenses', 
         filter: `household_id=eq.${householdId}` 
       }, () => {
-        console.log("Change detected in Supabase, refreshing...");
         fetchExpenses();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [householdId, fetchExpenses]);
 
-  // src/hooks/useExpenses.ts
-
-// ... inside the useExpenses hook
-const updateExpense = useCallback(async (id: string, updatedData: any) => {
-  const { error: err } = await supabase
-    .from('expenses')
-    .update({
-      name: updatedData.name,
-      amount: Number(updatedData.amount),
-      category: updatedData.category,
-      paid_by: updatedData.paid_by
-    })
-    .eq('id', id);
-
-  if (err) {
-    console.error("Update Error:", err.message);
-    fetchExpenses(); // Re-sync if it failed
-  }
-}, [fetchExpenses]);
-
-// Add updateExpense to the return object
-return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, summary };
-
+  // Logic for adding a new expense
   const addExpense = useCallback(async (data: any) => {
     const { error: err } = await supabase.from('expenses').insert([{
       name: data.name,
@@ -69,14 +46,27 @@ return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, s
     if (err) console.error("Add Error:", err.message);
   }, [householdId]);
 
+  // Logic for updating an existing expense
+  const updateExpense = useCallback(async (id: string, updatedData: any) => {
+    const { error: err } = await supabase
+      .from('expenses')
+      .update({
+        name: updatedData.name,
+        amount: Number(updatedData.amount),
+        category: updatedData.category,
+        paid_by: updatedData.paid_by
+      })
+      .eq('id', id);
+
+    if (err) {
+      console.error("Update Error:", err.message);
+      fetchExpenses();
+    }
+  }, [fetchExpenses]);
+
+  // Logic for deleting an expense
   const deleteExpense = useCallback(async (id: string | number) => {
-    // 1. Log the ID to the console for debugging
-    console.log("Attempting to delete ID:", id);
-
-    // 2. Optimistic Update: Hide it instantly
     setExpenses(prev => prev.filter(e => e.id !== id));
-
-    // 3. Delete from Supabase
     const { error: err } = await supabase
       .from('expenses')
       .delete()
@@ -84,12 +74,11 @@ return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, s
 
     if (err) {
       console.error("Supabase Delete Error:", err.message);
-      fetchExpenses(); // Re-sync if it failed
+      fetchExpenses();
     }
   }, [fetchExpenses]);
 
   const summary = useMemo(() => {
-    // Safety check to prevent black screen if expenses is not an array
     if (!Array.isArray(expenses) || expenses.length === 0) {
       return { total: 0, totalA: 0, totalB: 0, settlement: { debtor: 'Shek', creditor: 'Yoyo', amount: 0 } };
     }
@@ -107,5 +96,6 @@ return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, s
     };
   }, [expenses]);
 
-  return { expenses, isLoading, error, addExpense, deleteExpense, summary };
+  // SINGLE RETURN STATEMENT AT THE END
+  return { expenses, isLoading, error, addExpense, deleteExpense, updateExpense, summary };
 };

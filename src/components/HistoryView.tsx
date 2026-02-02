@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { CalendarDays, Trash2 } from 'lucide-react';
+import { CalendarDays, Trash2, Edit2 } from 'lucide-react'; // Added Edit2
 
 interface HistoryViewProps {
   expenses: any[];
   getCategoryColor: (name: string) => string;
   onDelete?: (id: string) => void;
+  onEdit: (expense: any) => void; // NEW: Added onEdit prop
 }
 
-const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryColor, onDelete }) => {
+const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryColor, onDelete, onEdit }) => {
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
 
   // SAFE GUARD: If getCategoryColor is missing, use a fallback function
@@ -105,10 +106,22 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryCol
                        </div>
                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-slate-200 font-bold text-sm">
+                <div className="flex items-center gap-2"> {/* Adjusted gap for buttons */}
+                  <div className="text-slate-200 font-bold text-sm mr-2">
                     {fmtMoney(Number(expense.amount || 0))}
                   </div>
+                  
+                  {/* NEW: Edit Button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onEdit(expense);
+                    }}
+                    className="p-1 text-slate-600 hover:text-blue-400 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+
                   {/* SAFE CALL: Check if onDelete is a function before calling */}
                   {typeof onDelete === 'function' && (
                     <button 

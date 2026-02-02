@@ -1,38 +1,37 @@
 import React, { useMemo, useState } from 'react';
-import { CalendarDays, Trash2, Edit2 } from 'lucide-react'; // Added Edit2
+import { CalendarDays, Trash2, Edit2, PieChart } from 'lucide-react';
 
 interface HistoryViewProps {
   expenses: any[];
   getCategoryColor: (name: string) => string;
   onDelete?: (id: string) => void;
-  onEdit: (expense: any) => void; // NEW: Added onEdit prop
+  onEdit: (expense: any) => void;
 }
 
 const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryColor, onDelete, onEdit }) => {
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
 
-  // SAFE GUARD: If getCategoryColor is missing, use a fallback function
   const safeGetColor = typeof getCategoryColor === 'function' 
     ? getCategoryColor 
     : () => '#3f3f46';
 
   const groupedExpenses = useMemo(() => {
-    const groups: Record<string, { expenses: any[]; total: number }> = {};
-    
-    // Ensure expenses is an array before looping
+    const groups: Record<string, { expenses: any[]; total: number; categories: Record<string, number> }> = {};
     if (!Array.isArray(expenses)) return [];
 
     expenses.forEach(expense => {
       const rawDate = expense.created_at || new Date().toISOString();
-      const key = viewMode === 'month' 
-        ? rawDate.substring(0, 7) 
-        : rawDate.substring(0, 4);
+      const key = viewMode === 'month' ? rawDate.substring(0, 7) : rawDate.substring(0, 4);
 
       if (!groups[key]) {
-        groups[key] = { expenses: [], total: 0 };
+        groups[key] = { expenses: [], total: 0, categories: {} };
       }
       groups[key].expenses.push(expense);
       groups[key].total += Number(expense.amount || 0);
+      
+      // Track category totals for the chart
+      const cat = expense.category || 'Other';
+      groups[key].categories[cat] = (groups[key].categories[cat] || 0) + Number(expense.amount || 0);
     });
 
     return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
@@ -42,13 +41,8 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryCol
     try {
       if (viewMode === 'year') return dateStr;
       const [year, month] = dateStr.split('-');
-      return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric'
-      });
-    } catch (e) {
-      return "Current Period";
-    }
+      return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } catch (e) { return "Current Period"; }
   };
 
   const fmtMoney = (amount: number) => 
@@ -83,17 +77,51 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryCol
       </div>
       
       {groupedExpenses.map(([key, data]) => (
-        <div key={key} className="space-y-3">
+        <div key={key} className="space-y-6">
           <div className="flex items-end justify-between px-2 pb-2 border-b border-white/5">
             <h3 className="text-sm font-medium text-slate-400">{fmtDate(key)}</h3>
             <span className="text-white font-bold tracking-tight">{fmtMoney(data.total)}</span>
+          </div>
+
+          {/* NEW: Category Breakdown Chart for this period */}
+          <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-4 mx-2">
+            <div className="flex items-center gap-2 mb-4">
+                <PieChart className="w-3 h-3 text-zinc-500" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Spending Breakdown</span>
+            </div>
+            
+            {/* Visual Progress Bar Chart */}
+            <div className="flex h-3 w-full rounded-full overflow-hidden bg-zinc-800 mb-4">
+                {Object.entries(data.categories).map(([catName, catAmount]) => (
+                    <div 
+                        key={catName}
+                        style={{ 
+                            width: `${(catAmount / data.total) * 100}%`,
+                            backgroundColor: safeGetColor(catName)
+                        }}
+                        className="h-full transition-all duration-500"
+                    />
+                ))}
+            </div>
+
+            {/* Legend Labels */}
+            <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                {Object.entries(data.categories).map(([catName, catAmount]) => (
+                    <div key={catName} className="flex items-center justify-between text-[10px]">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: safeGetColor(catName) }} />
+                            <span className="text-zinc-400 font-bold truncate">{catName}</span>
+                        </div>
+                        <span className="text-zinc-500 font-medium">{Math.round((catAmount / data.total) * 100)}%</span>
+                    </div>
+                ))}
+            </div>
           </div>
           
           <div className="space-y-2">
             {data.expenses.map(expense => (
               <div key={expense.id} className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
                 <div className="flex items-center gap-4">
-                   {/* SAFE CALL to the color function */}
                    <div className="w-1.5 h-8 rounded-full opacity-60" style={{ backgroundColor: safeGetColor(expense.category || 'Other') }} />
                    <div>
                        <div className="text-slate-200 text-sm font-medium">{expense.name || 'Untitled'}</div>
@@ -106,30 +134,20 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses = [], getCategoryCol
                        </div>
                    </div>
                 </div>
-                <div className="flex items-center gap-2"> {/* Adjusted gap for buttons */}
+                <div className="flex items-center gap-2">
                   <div className="text-slate-200 font-bold text-sm mr-2">
                     {fmtMoney(Number(expense.amount || 0))}
                   </div>
-                  
-                  {/* NEW: Edit Button */}
                   <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onEdit(expense);
-                    }}
-                    className="p-1 text-slate-600 hover:text-blue-400 transition-colors"
+                    onClick={(e) => { e.preventDefault(); onEdit(expense); }}
+                    className="p-1 text-zinc-600 hover:text-blue-400 transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
-
-                  {/* SAFE CALL: Check if onDelete is a function before calling */}
                   {typeof onDelete === 'function' && (
                     <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onDelete(expense.id);
-                      }} 
-                      className="p-1 text-slate-600 hover:text-red-400 opacity-100 transition-opacity"
+                      onClick={(e) => { e.preventDefault(); onDelete(expense.id); }} 
+                      className="p-1 text-zinc-600 hover:text-red-400 opacity-100 transition-opacity"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

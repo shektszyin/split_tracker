@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, Database, Info, ChevronRight, Plus, X, Check, Edit2, UserCircle } from 'lucide-react';
+import { Trash2, Database, Info, ChevronRight, Plus, X, Check, Edit2, UserCircle, Wallet } from 'lucide-react';
 import { USE_BACKEND } from '../constants';
 import { CategoryItem } from '../types';
 import { COLOR_PALETTE } from '../constants';
@@ -27,12 +27,10 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   const [newCatName, setNewCatName] = useState('');
   const [newCatColor, setNewCatColor] = useState(COLOR_PALETTE[0]);
 
-  // Temporary state for editing existing item
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
 
-  // User name editing state
   const [editingUserIndex, setEditingUserIndex] = useState<number | null>(null);
   const [tempUserName, setTempUserName] = useState('');
 
@@ -65,7 +63,6 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     if (newCatName) {
       onAddCategory(newCatName, newCatColor);
       setNewCatName('');
-      // Cycle color
       const currentIndex = COLOR_PALETTE.indexOf(newCatColor);
       setNewCatColor(COLOR_PALETTE[(currentIndex + 1) % COLOR_PALETTE.length]);
     }
@@ -81,14 +78,14 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     <div className="space-y-8 animate-fade-in pt-4 pb-20">
       <h2 className="text-xl font-bold text-white px-2 tracking-tight">Settings</h2>
 
-       {/* User Profiles */}
+       {/* Household Profiles */}
       <div className="space-y-3">
-         <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Users</h3>
+         <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Bill Splitters</h3>
          <div className="bg-slate-900/40 backdrop-blur-md rounded-3xl overflow-hidden ring-1 ring-white/5 p-4 space-y-4">
              {userNames.map((name, idx) => (
                  <div key={idx} className="flex items-center justify-between">
                      <div className="flex items-center gap-3 flex-1">
-                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${idx === 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${idx === 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-orange-500/10 text-orange-400'}`}>
                              <UserCircle className="w-5 h-5" />
                          </div>
                          {editingUserIndex === idx ? (
@@ -107,12 +104,12 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                          ) : (
                              <div className="flex flex-col">
                                  <span className="text-base text-slate-200 font-medium">{name}</span>
-                                 <span className="text-xs text-slate-500">User {idx + 1}</span>
+                                 <span className="text-xs text-slate-500">Partner {idx + 1}</span>
                              </div>
                          )}
                      </div>
                      {editingUserIndex !== idx && (
-                         <button onClick={() => handleStartUserEdit(idx, name)} className="p-2 text-slate-600 hover:text-white">
+                         <button onClick={() => handleStartUserEdit(idx, name)} className="p-2 text-slate-600 hover:text-white transition-colors">
                              <Edit2 className="w-4 h-4" />
                          </button>
                      )}
@@ -124,12 +121,12 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       {/* Category Management */}
       <div className="space-y-3">
          <div className="flex items-center justify-between px-2">
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Categories</h3>
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Expense Categories</h3>
             <button 
               onClick={() => setIsEditingCats(!isEditingCats)}
               className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
             >
-              {isEditingCats ? 'Done' : 'Manage'}
+              {isEditingCats ? 'Done' : 'Edit List'}
             </button>
          </div>
 
@@ -137,7 +134,6 @@ const SettingsView: React.FC<SettingsViewProps> = ({
             {categories.map(cat => (
                <div key={cat.id} className="flex items-center justify-between gap-3">
                   {editId === cat.id ? (
-                     // Edit Mode Row
                      <div className="flex-1 flex items-center gap-2">
                         <button 
                           type="button"
@@ -160,10 +156,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                         </button>
                      </div>
                   ) : (
-                     // Display Mode Row
                      <>
                        <div className="flex items-center gap-3">
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                          <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.1)]" style={{ backgroundColor: cat.color }} />
                           <span className="text-sm text-slate-200 font-medium">{cat.name}</span>
                        </div>
                        {isEditingCats && (
@@ -181,7 +176,6 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                </div>
             ))}
 
-            {/* Add New Row */}
             {isEditingCats && (
                <div className="pt-3 border-t border-white/5 flex items-center gap-2">
                   <button 
@@ -200,7 +194,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                   <button 
                      onClick={handleAdd}
                      disabled={!newCatName}
-                     className="p-1.5 bg-emerald-500 text-slate-900 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                     className="p-1.5 bg-emerald-500 text-slate-900 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                   >
                      <Plus className="w-4 h-4" />
                   </button>
@@ -212,7 +206,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       <div className="space-y-6">
         {/* Data Section */}
         <div className="space-y-3">
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Data</h3>
+          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Data & Storage</h3>
           <div className="bg-slate-900/40 backdrop-blur-md rounded-3xl overflow-hidden ring-1 ring-white/5">
              <button 
                onClick={onClearData}
@@ -223,7 +217,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                     <Trash2 className="w-4 h-4 text-red-400" />
                   </div>
                   <div className="text-left">
-                    <div className="text-slate-200 font-medium text-sm">Clear Data</div>
+                    <div className="text-slate-200 font-medium text-sm">Clear All History</div>
+                    <div className="text-[10px] text-zinc-500 uppercase font-bold tracking-tight">Destructive action</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400" />
@@ -231,7 +226,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* System Section */}
+        {/* System Info */}
         <div className="space-y-3">
           <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">System</h3>
           <div className="bg-slate-900/40 backdrop-blur-md rounded-3xl overflow-hidden ring-1 ring-white/5 divide-y divide-white/5">
@@ -241,9 +236,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                     <Database className="w-4 h-4 text-indigo-400" />
                   </div>
                   <div className="text-left">
-                    <div className="text-slate-200 font-medium text-sm">Storage Mode</div>
+                    <div className="text-slate-200 font-medium text-sm">Storage Engine</div>
                     <div className="text-[11px] text-slate-500">
-                        {USE_BACKEND ? 'Cloud Sync (Beta)' : 'Local Storage'}
+                        {USE_BACKEND ? 'Supabase Real-time' : 'LocalStorage Engine'}
                     </div>
                   </div>
                 </div>
@@ -256,8 +251,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                     <Info className="w-4 h-4 text-slate-400" />
                   </div>
                   <div className="text-left">
-                    <div className="text-slate-200 font-medium text-sm">Version</div>
-                    <div className="text-[11px] text-slate-500">1.1.0</div>
+                    <div className="text-slate-200 font-medium text-sm">Split Tracker Build</div>
+                    <div className="text-[11px] text-slate-500">v1.2.0 • 2026 Stable</div>
                   </div>
                 </div>
              </div>
@@ -266,7 +261,10 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
       
       <div className="pt-8 text-center">
-        <p className="text-slate-700 text-xs font-medium tracking-wide">FAIRSHARE</p>
+        <div className="flex items-center justify-center gap-2 text-slate-700">
+            <Wallet className="w-4 h-4" />
+            <p className="text-xs font-black tracking-[0.4em] uppercase">FairShare</p>
+        </div>
       </div>
     </div>
   );
